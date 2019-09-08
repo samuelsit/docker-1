@@ -1,0 +1,10 @@
+docker container run --name Abathur -v ~/:/root -p 3000:3000 -dit python:2-slim
+docker exec Abathur pip install Flask
+docker-machine ssh Char "sudo chmod 777 /Users/ssitruk && echo \"from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+	return 'Hello, World!'
+\" > /Users/ssitruk/app.py"
+docker exec -e FLASK_APP=/root/app.py Abathur flask run --port 3000 --host 0.0.0.0
