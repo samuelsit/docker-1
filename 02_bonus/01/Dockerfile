@@ -1,6 +1,6 @@
-FROM ubuntu
+FROM alpine
 
-RUN apt-get update && apt-get upgrade -y && apt-get install -y build-essential git
+RUN apk update && apk upgrade && apk add build-base git
 
 RUN git clone https://github.com/kejlerj/Puissance4.git
 
