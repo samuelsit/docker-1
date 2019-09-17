@@ -8,21 +8,18 @@ RUN bash script.deb.sh
 
 RUN apt-get install -y gitlab-ce
 
-RUN mkdir -p /etc/gitlab/ssl
-RUN chmod 700 /etc/gitlab/ssl
-RUN openssl req \
-			-x509 \
-			-days 365 \
-			-newkey rsa:2048 -nodes \
-			-keyout /etc/gitlab/ssl/ruru.gitlab.key \
-			-out /etc/gitlab/ssl/ruru.gitlab.crt \
-			-subj "/C=FR/ST=IDF/L=Paris/O=42/CN=www.ruru.gitlab.com"
+RUN mkdir -p /etc/gitlab/ssl && \
+	chmod 700 /etc/gitlab/ssl && \
+	openssl req -new -x509 -nodes -newkey rsa:2048 -keyout /etc/gitlab/ssl/gitlab.key -out /etc/gitlab/ssl/gitlab.crt -days 365 -subj /CN=192.168.99.100
 
-RUN echo "external_url \"https://ruru.gitlab.com\"" >> /etc/gitlab/gitlab.rb
-RUN echo "nginx['redirect_http_to_https'] = true" >> /etc/gitlab/gitlab.rb
-RUN echo "nginx['ssl_certificate'] = \"/etc/gitlab/ssl/ruru.gitlab.crt\"" >> /etc/gitlab/gitlab.rb
-RUN echo "nginx['ssl_certificate_key'] = \"/etc/gitlab/ssl/ruru.gitlab.key\"" >> /etc/gitlab/gitlab.rb
+RUN echo "external_url \"https://192.168.99.100\"" >> /etc/gitlab/gitlab.rb
 
-EXPOSE 22 80 443
+RUN echo "nginx['ssl_certificate'] = \"/etc/gitlab/ssl/gitlab.crt\"" >> /etc/gitlab/gitlab.rb
+
+RUN echo "nginx['ssl_certificate_key'] = \"/etc/gitlab/ssl/gitlab.key\"" >> /etc/gitlab/gitlab.rb
+
+RUN echo "gitlab_rails['gitlab_shell_ssh_port'] = 22" >> /etc/gitlab/gitlab.rb
+
+EXPOSE 22 443
 
 ENTRYPOINT (/opt/gitlab/embedded/bin/runsvdir-start &) && service ssh start && gitlab-ctl reconfigure && gitlab-ctl tail
